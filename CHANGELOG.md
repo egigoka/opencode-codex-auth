@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - Added an explicit **Manage accounts** login method, including access when browser launch is disabled.
 - Prevented non-interactive account management from starting an OAuth login.
 - Added installable package tarballs to GitHub releases, including fork releases without upstream npm publishing credentials.
+- Updated dependency resolutions and overrides to pass the high-severity release audit.
 
 ## 1.10.0 - 2026-07-18
 
