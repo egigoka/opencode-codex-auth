@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 1.10.1 - 2026-10-11
+
+- Added an explicit **Manage accounts** login method, including access when browser launch is disabled.
+- Prevented non-interactive account management from starting an OAuth login.
+- Added installable package tarballs to GitHub releases, including fork releases without upstream npm publishing credentials.
+
 ## 1.10.0 - 2026-07-18
 
 - Added `runtime.ultraReasoningEffort` to override Ultra's default `max` inference effort with `low`, `medium`, `high`, or `xhigh`.

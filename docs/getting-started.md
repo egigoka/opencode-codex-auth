@@ -33,6 +33,22 @@ Installer flags:
 - `--config <path>`: use a custom `opencode.json` path.
 - `--plugin <specifier>`: override plugin specifier written into `opencode.json`.
 
+### Install this fork's GitHub release
+
+The `egigoka/opencode-codex-auth` fork publishes package tarballs on GitHub. To install version `1.10.1`:
+
+```bash
+npm install --prefix "$HOME/.local/share/opencode-codex-auth" --omit=dev --ignore-scripts \
+	"https://github.com/egigoka/opencode-codex-auth/releases/download/v1.10.1/iam-brain-opencode-codex-auth-1.10.1.tgz"
+```
+
+Remove any other OpenAI OAuth plugin from `opencode.json`, then enable the installed release:
+
+```bash
+node "$HOME/.local/share/opencode-codex-auth/node_modules/@iam-brain/opencode-codex-auth/dist/bin/opencode-codex-auth.js" install \
+	--plugin "file://$HOME/.local/share/opencode-codex-auth/node_modules/@iam-brain/opencode-codex-auth/dist/index.js"
+```
+
 `codex-config.jsonc` is created at the default resolved config location when no config exists. To load config from a custom path at runtime, set `OPENCODE_OPENAI_MULTI_CONFIG_PATH`.
 
 ## 2) Keep OpenCode config minimal
@@ -64,6 +80,14 @@ Use schemas for autocomplete/validation:
 ```bash
 opencode auth login
 ```
+
+Select **OpenAI**, then **Manage accounts**. To open the manager directly:
+
+```bash
+opencode auth login --provider openai --method "Manage accounts"
+```
+
+The browser login method also opens this menu in an interactive terminal. If you see **Add Another OpenAI Account** instead, OpenCode is loading a different plugin. Replace that plugin entry in `opencode.json` with this plugin.
 
 Account manager highlights:
 
