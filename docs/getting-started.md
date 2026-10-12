@@ -35,11 +35,11 @@ Installer flags:
 
 ### Install this fork's GitHub release
 
-The `egigoka/opencode-codex-auth` fork publishes package tarballs on GitHub. To install version `1.10.1`:
+The `egigoka/opencode-codex-auth` fork publishes package tarballs on GitHub. To install version `1.10.2`:
 
 ```bash
 npm install --prefix "$HOME/.local/share/opencode-codex-auth" --omit=dev --ignore-scripts \
-	"https://github.com/egigoka/opencode-codex-auth/releases/download/v1.10.1/iam-brain-opencode-codex-auth-1.10.1.tgz"
+	"https://github.com/egigoka/opencode-codex-auth/releases/download/v1.10.2/iam-brain-opencode-codex-auth-1.10.2.tgz"
 ```
 
 Remove any other OpenAI OAuth plugin from `opencode.json`, then enable the installed release:
@@ -145,7 +145,8 @@ Notes:
 
 - The live Codex catalog still advertises a standard `272000` context window for `gpt-5.4`.
 - Larger `model_context_window` values are explicit request overrides.
-- The plugin clamps `model_context_window` to `1,050,000`, `model_auto_compact_token_limit` to `min(922,000, model_context_window - 128,000)`, and `max_output_tokens` to `128,000` when they are set on `gpt-5.4*` requests.
+- The plugin clamps `model_context_window` to `1,050,000` and `model_auto_compact_token_limit` to `min(922,000, model_context_window - 128,000)` when they are set on `gpt-5.4*` requests.
+- The ChatGPT backend rejects `max_output_tokens`, so the plugin removes that request field for every model before dispatch.
 - The `922,000` ceiling is the full-window practical safe-input budget derived from the documented `1,050,000` total context window minus the documented `128,000` max output budget.
 - If you request a smaller `model_context_window`, the plugin preserves the same output headroom by clamping `model_auto_compact_token_limit` to `model_context_window - 128,000`.
 - OpenAI's current GPT-5.4 guidance says prompts above the standard `272,000` input window are billed at higher long-context rates.

@@ -150,8 +150,10 @@ Mode-derived runtime defaults when omitted:
 - A successful live `/backend-api/codex/models` response wins for every matching slug. Official GitHub entries supply only slugs missing from that response.
 - The plugin does not combine fields across matching live and GitHub entries. GitHub-supplied models retain `catalog_source: "github_fallback"` so their provenance remains observable.
 - When live catalog data is unavailable, the normalized GitHub snapshot supplies the fallback catalog.
-- Do not rely on a static model list: GPT-5.6-era models and variants can arrive from either source under those precedence rules.
+- Do not rely on a static model list: GPT-5.6 and GPT-6-era models and variants can arrive from either source under those precedence rules.
 - Catalog visibility is not an entitlement guarantee. Actual backend access still depends on the authenticated account and may require re-authentication after an account or model rollout.
+
+GPT-6 Astra is admitted only when the live account catalog or the version-matched official Codex catalog contains `gpt-6-astra`; the plugin does not create the canonical model from documentation alone. The offline Codex client fallback is `0.153.2`, whose official snapshot contains Astra; the model itself declares `0.153.0` as its minimum client version.
 
 - `global.personality: string`
   - Personality key applied to all models unless overridden.
@@ -166,7 +168,7 @@ Mode-derived runtime defaults when omitted:
   - There is no public concurrency setting; OpenCode remains responsible for agent execution and lifecycle.
   - The overlay is generated from pinned Codex source with exact, count-checked substitutions backed by pinned OpenCode task-tool evidence. See `docs/development/PROMPT_COMPATIBILITY.md`.
 - `global.reasoningMode: "standard" | "pro"` (optional)
-  - GPT-5.6 reasoning mode, emitted as `reasoning.mode` independently of `reasoning.effort`.
+  - GPT-5.6 and GPT-6 Astra reasoning mode, emitted as `reasoning.mode` independently of `reasoning.effort`.
   - An explicit request value is preserved. The same per-model and per-variant precedence applies.
 - `global.reasoningSummary: "auto" | "concise" | "detailed" | "none"`
   - Global reasoning summary format override forwarded upstream as `reasoning.summary`.
@@ -233,9 +235,9 @@ Custom model notes:
 ### Generated Fast, 1M, and Pro models
 
 - `modelAliases.fast` defaults to `true`. Any catalog model advertising priority/Fast gets a separate `[Model Name] Fast` provider model routed to the canonical slug with `service_tier: "priority"`.
-- `modelAliases.extendedContext` defaults to `true`. Models advertising a larger `max_context_window` get `[Model Name] 1M`. GPT-5.6 Sol/Terra/Luna use the official 1,050,000 context, 922,000 max input, and 128,000 max output contract even while a Codex catalog reports a smaller normal window.
+- `modelAliases.extendedContext` defaults to `true`. Models advertising a larger `max_context_window` get `[Model Name] 1M`. GPT-5.6 Sol/Terra/Luna and GPT-6 Astra use the official 1,050,000 context, 922,000 max input, and 128,000 max output contract even while a Codex catalog reports a smaller normal window or override cap.
 - `modelAliases.pro` defaults to `false` for ChatGPT OAuth and `true` for API-key auth. Explicit `true` or `false` overrides the auth-aware default.
-- `[Model Name] Pro` is the same canonical GPT-5.6 Sol/Terra/Luna slug with `reasoning: { mode: "pro" }`; effort remains independently selectable.
+- `[Model Name] Pro` is the same canonical GPT-5.6 Sol/Terra/Luna or GPT-6 Astra slug with `reasoning: { mode: "pro" }`; effort remains independently selectable.
 - Fast, 1M, and Pro are three separate aliases. The plugin does not create combination aliases.
 - API-key handling is limited to cloning/routing provider entries; OAuth storage, rotation, refresh, and API-key authentication remain unchanged.
 - Account-scoped catalog responses remain authoritative. The plugin does not copy metadata across canonical slugs.
@@ -243,11 +245,11 @@ Custom model notes:
 ### GPT-5.4 long context
 
 - The plugin preserves an explicit request-body `service_tier` if your host already sets one.
-- The plugin preserves request-level `model_context_window`, `model_auto_compact_token_limit`, and `max_output_tokens` fields through all payload rewrites.
+- The plugin preserves request-level `model_context_window` and `model_auto_compact_token_limit` fields through payload rewrites.
 - For `gpt-5.4*`, the plugin clamps those request-level overrides to the currently documented GPT-5.4 long-context limits before sending the request:
   - `model_context_window <= 1,050,000`
   - `model_auto_compact_token_limit <= min(922,000, model_context_window - 128,000)`
-  - `max_output_tokens <= 128,000`
+- The ChatGPT backend rejects `max_output_tokens`, so the plugin removes that request field for every model before dispatch.
 - The `922,000` auto-compact ceiling is the full-window practical safe-input cap derived from the published `1,050,000` total context budget minus the published `128,000` max output budget.
 - If you request a smaller `model_context_window`, the plugin also preserves the same output headroom by clamping `model_auto_compact_token_limit` to `model_context_window - 128,000`.
 - The live Codex catalog currently still reports `context_window: 272000` for `gpt-5.4`, so any larger `model_context_window` value is an explicit request override rather than a catalog default.
