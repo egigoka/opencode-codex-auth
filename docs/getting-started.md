@@ -35,11 +35,11 @@ Installer flags:
 
 ### Install this fork's GitHub release
 
-The `egigoka/opencode-codex-auth` fork publishes package tarballs on GitHub. To install version `1.10.2`:
+The `egigoka/opencode-codex-auth` fork publishes package tarballs on GitHub. To install version `1.10.3`:
 
 ```bash
 npm install --prefix "$HOME/.local/share/opencode-codex-auth" --omit=dev --ignore-scripts \
-	"https://github.com/egigoka/opencode-codex-auth/releases/download/v1.10.2/iam-brain-opencode-codex-auth-1.10.2.tgz"
+	"https://github.com/egigoka/opencode-codex-auth/releases/download/v1.10.3/iam-brain-opencode-codex-auth-1.10.3.tgz"
 ```
 
 Remove any other OpenAI OAuth plugin from `opencode.json`, then enable the installed release:

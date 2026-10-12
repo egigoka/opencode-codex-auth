@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 1.10.3 - 2026-10-12
+
+- Use cached model catalogs immediately at startup while refreshing in the background, preserving live-catalog precedence and account scope.
+- Keep cached models available when a background refresh fails, while retaining the existing fetch path for cold startup.
+
 ## 1.10.2 - 2026-10-12
 
 - Fixed ChatGPT OAuth requests failing with `Unsupported parameter: max_output_tokens` by removing that field for every model before dispatch.
