@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 2.0.0 - 2026-10-26
+
+- Added OpenCode 2.x plugin support via `server.js` (`id: opencode-codex-auth`).
+- Routes OpenAI OAuth responses traffic through an authenticated loopback proxy reusing the existing rotation/fetch transport.
+- Registers the 5 account/personality tools and commands plus the 3 OAuth login methods through V2 transforms.
+- Forces HTTP transport for the OpenAI provider so the V2 driver path stays on the supported route.
+- Added `v2/` proxy/unit tests, `tui/` toast notifications, and `V2.md`.
+- V1 source remains for shared behavior and regression tests.
+
 ## 1.10.3 - 2026-10-12
 
 - Use cached model catalogs immediately at startup while refreshing in the background, preserving live-catalog precedence and account scope.

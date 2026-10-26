@@ -4,7 +4,8 @@ Track the OpenCode and Codex releases this plugin is aligned to, and how to keep
 
 ## Current baseline
 
-- OpenCode release: `v1.17.18`
+- Runtime entrypoint: OpenCode `2.x` via `server.js` (see `V2.md`); V1 core retained for shared behavior and regression tests.
+- Upstream parity baseline (V1 hook semantics): OpenCode release: `v1.17.18`
 - Upstream repo: `https://github.com/anomalyco/opencode`
 - Baseline tag commit: tracked in `docs/development/upstream-watch.json`
 - Upstream HEAD inspected: GitHub latest release/tag via `npm run check:upstream`

@@ -2,7 +2,7 @@
   "name": "@iam-brain/opencode-codex-auth",
   "version": "1.10.3",
   "description": "Native Codex auth with multi-account rotation for OpenCode",
-  "main": "./dist/index.js",
+  "main": "./server.js",
   "types": "./dist/index.d.ts",
   "packageManager": "npm@10.9.2",
   "type": "module",
@@ -44,6 +44,7 @@
     "prepush": "npm run verify:local",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage.enabled true --coverage.provider=v8",
+    "test:v2": "node --test v2/*.test.js",
     "test:anti-mock": "node scripts/check-test-mocking.mjs",
     "check:coverage-ratchet": "node scripts/check-coverage-ratchet.mjs",
     "check:docs": "node scripts/check-docs-references.mjs",
@@ -71,6 +72,10 @@
     "format": "biome format --write index.ts lib test bin scripts docs package.json biome.json README.md CHANGELOG.md CONTRIBUTING.md SECURITY.md LICENSE schemas tsconfig.json tsconfig.test.json vitest.config.ts",
     "format:check": "biome format index.ts lib test bin scripts docs package.json biome.json README.md CHANGELOG.md CONTRIBUTING.md SECURITY.md LICENSE schemas tsconfig.json tsconfig.test.json vitest.config.ts --diagnostic-level=error"
   },
+  "exports": {
+    ".": "./server.js",
+    "./tui": "./tui/index.js"
+  },
   "files": [
     "dist/bin/",
     "dist/index.d.ts",
@@ -80,6 +85,9 @@
     "dist/lib/",
     "prompts/upstream/licenses/",
     "schemas/",
+    "server.js",
+    "v2/",
+    "tui/",
     "README.md",
     "LICENSE"
   ],

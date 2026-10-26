@@ -16,7 +16,7 @@ OpenCode plugin for ChatGPT OAuth auth with multi-account management and Codex-c
 
 - Node.js `>=22 <27`
 - npm `10.9.2` (via `packageManager` / Corepack)
-- OpenCode CLI available on your PATH
+- OpenCode `2.x` available on your PATH (V2 plugin entrypoint is `server.js`; see [V2.md](V2.md))
 
 ## Install
 
