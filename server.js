@@ -166,7 +166,7 @@ export default {
       )
       await ctx.integration.transform((editor) => {
         hooks.auth.methods
-          .filter((method) => method.type === "oauth")
+          .filter((method) => method.type === "oauth" && method.label !== "Manage accounts")
           .forEach((method, index) => {
             const id = `codex-auth-${index}`
             editor.method.update({
