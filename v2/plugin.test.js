@@ -1,6 +1,6 @@
 import test from "node:test"
 import assert from "node:assert/strict"
-import { commandArgsForTool, createV1EventForwarder, isV2OAuthMethodExposed, oauthCredential } from "../server.js"
+import { buildV2OAuthMethodRegistration, commandArgsForTool, createV1EventForwarder, isV2OAuthMethodExposed, oauthCredential } from "../server.js"
 
 test("oauthCredential maps success results and rejects failures", async () => {
   assert.deepEqual(
@@ -31,6 +31,55 @@ test("v2 hides Manage accounts oauth method", () => {
     { type: "api", label: "Manually enter API Key" }
   ]
   assert.deepEqual(methods.filter(isV2OAuthMethodExposed), [{ type: "oauth", label: "ChatGPT Pro/Plus (browser)" }])
+})
+
+test("v2 registration keeps authorize top-level and callback lazy", async () => {
+  let releaseCallback
+  const gate = new Promise((resolve) => {
+    releaseCallback = resolve
+  })
+  const v1method = {
+    label: "ChatGPT Pro/Plus (browser)",
+    authorize: async () => ({
+      url: "https://auth.example/authorize",
+      instructions: "Complete authorization in your browser.",
+      method: "auto",
+      callback: () => gate.then(() => ({ type: "success", access: "a", refresh: "r", expires: 123 }))
+    })
+  }
+  const registration = buildV2OAuthMethodRegistration(v1method, "codex-auth-0")
+  assert.equal(registration.integrationID, "openai")
+  assert.deepEqual(registration.method, { id: "codex-auth-0", type: "oauth", label: "ChatGPT Pro/Plus (browser)" })
+  assert.equal(typeof registration.authorize, "function")
+  assert.equal("authorize" in registration.method, false)
+
+  const pending = registration.authorize()
+  const authorization = await pending
+  assert.equal(authorization.url, "https://auth.example/authorize")
+  assert.equal(authorization.mode, "auto")
+  assert.ok(authorization.callback instanceof Promise)
+  releaseCallback()
+  assert.deepEqual(await authorization.callback, {
+    type: "oauth",
+    methodID: "codex-auth-0",
+    access: "a",
+    refresh: "r",
+    expires: 123
+  })
+})
+
+test("v2 registration surfaces authorization failure through callback", async () => {
+  const v1method = {
+    label: "ChatGPT Pro/Plus (browser)",
+    authorize: async () => ({
+      url: "",
+      instructions: "Authorization failed.",
+      method: "auto",
+      callback: async () => ({ type: "failed" })
+    })
+  }
+  const authorization = await buildV2OAuthMethodRegistration(v1method, "codex-auth-0").authorize()
+  await assert.rejects(authorization.callback, /OpenAI authorization failed/)
 })
 
 test("v1 event forwarder translates session deletion cleanup", async () => {

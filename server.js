@@ -31,6 +31,31 @@ export function isV2OAuthMethodExposed(method) {
   // Account management stays available via codex-* tools.
   return method.label !== "Manage accounts"
 }
+export function buildV2OAuthMethodRegistration(method, id) {
+  return {
+    integrationID: "openai",
+    method: {
+      id,
+      type: "oauth",
+      label: method.label
+    },
+    // authorize stays top-level: core only adds registrations with a
+    // top-level authorize to the connectable implementations map, and the
+    // list UI reads entry.methods. A nested authorize lists the method but
+    // every connect fails with "OAuth method not found" (500).
+    authorize: async () => {
+      const flow = await method.authorize()
+      return {
+        url: flow.url,
+        instructions: flow.instructions,
+        // v1 flows here always use method "auto"; keep the callback lazy so
+        // the TUI shows url/instructions while the browser flow completes.
+        mode: "auto",
+        callback: (async () => oauthCredential(await flow.callback(), id))()
+      }
+    }
+  }
+}
 export function createV1EventForwarder(hooks) {
   return async (event) => {
     const type = event?.type
@@ -176,24 +201,7 @@ export default {
           .filter(isV2OAuthMethodExposed)
           .forEach((method, index) => {
             const id = `codex-auth-${index}`
-            editor.method.update({
-              integrationID: "openai",
-              method: {
-                id,
-                type: "oauth",
-                label: method.label,
-                authorize: async () => {
-                  const flow = await method.authorize()
-                  const credential = await oauthCredential(await flow.callback(), id)
-                  return {
-                    url: flow.url,
-                    instructions: flow.instructions,
-                    mode: flow.method,
-                    callback: credential
-                  }
-                }
-              }
-            })
+            editor.method.update(buildV2OAuthMethodRegistration(method, id))
           })
       })
       await ctx.tool.transform((editor) => {
