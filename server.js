@@ -24,6 +24,13 @@ export function commandArgsForTool(name, promptText) {
   return {}
 }
 
+export function isV2OAuthMethodExposed(method) {
+  if (method?.type !== "oauth") return false
+  // Manage accounts needs a TTY menu; the v2 plugin host has none, so
+  // exposing it turns every selection into a failed callback (500).
+  // Account management stays available via codex-* tools.
+  return method.label !== "Manage accounts"
+}
 export function createV1EventForwarder(hooks) {
   return async (event) => {
     const type = event?.type
@@ -166,7 +173,7 @@ export default {
       )
       await ctx.integration.transform((editor) => {
         hooks.auth.methods
-          .filter((method) => method.type === "oauth" && method.label !== "Manage accounts")
+          .filter(isV2OAuthMethodExposed)
           .forEach((method, index) => {
             const id = `codex-auth-${index}`
             editor.method.update({

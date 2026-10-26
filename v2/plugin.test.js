@@ -1,6 +1,6 @@
 import test from "node:test"
 import assert from "node:assert/strict"
-import { commandArgsForTool, createV1EventForwarder, oauthCredential } from "../server.js"
+import { commandArgsForTool, createV1EventForwarder, isV2OAuthMethodExposed, oauthCredential } from "../server.js"
 
 test("oauthCredential maps success results and rejects failures", async () => {
   assert.deepEqual(
@@ -22,6 +22,15 @@ test("command args parse account index and remove confirmation", () => {
     confirm: false
   })
   assert.deepEqual(commandArgsForTool("codex-status", "codex-status"), {})
+})
+
+test("v2 hides Manage accounts oauth method", () => {
+  const methods = [
+    { type: "oauth", label: "ChatGPT Pro/Plus (browser)" },
+    { type: "oauth", label: "Manage accounts" },
+    { type: "api", label: "Manually enter API Key" }
+  ]
+  assert.deepEqual(methods.filter(isV2OAuthMethodExposed), [{ type: "oauth", label: "ChatGPT Pro/Plus (browser)" }])
 })
 
 test("v1 event forwarder translates session deletion cleanup", async () => {
