@@ -6,7 +6,7 @@ test("proxy rejects untrusted requests and forwards only the fixed OAuth endpoin
   let calls = 0
   const proxy = await createRotationProxy(async (url, init) => {
     calls++
-    assert.equal(url, "https://chatgpt.com/backend-api/responses")
+    assert.equal(url, "https://chatgpt.com/backend-api/codex/responses")
     assert.equal(init.headers.get("authorization"), null)
     assert.equal(init.headers.get("x-opencode-rotation"), null)
     assert.equal(init.headers.get("session-id"), "session-test")

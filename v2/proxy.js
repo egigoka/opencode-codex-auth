@@ -47,7 +47,9 @@ export async function createRotationProxy(forward) {
         if (typeof req.headers[key] === "string") headers.set(key, req.headers[key])
       }
       // The legacy transport adds /codex and validates the final backend URL.
-      const response = await forward("https://chatgpt.com/backend-api/responses", {
+      // Target the /codex endpoint directly: request-routing only rewrites
+      // /v1/* paths, so /backend-api/responses would 404 (backend removed the alias).
+      const response = await forward("https://chatgpt.com/backend-api/codex/responses", {
         method: "POST",
         headers,
         body: Buffer.concat(chunks).toString("utf8"),

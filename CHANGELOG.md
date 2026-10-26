@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Fixed all `openai/*` requests failing with HTTP 502 when the loader receives no provider models by skipping ultra-variant hiding on missing input.
+- Fixed the V2 rotation proxy targeting the removed `.../backend-api/responses` endpoint; it now forwards to `.../backend-api/codex/responses`.
+
 ## 2.0.0 - 2026-10-26
 
 - Added OpenCode 2.x plugin support via `server.js` (`id: opencode-codex-auth`).
