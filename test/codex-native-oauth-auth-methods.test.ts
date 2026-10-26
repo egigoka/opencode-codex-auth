@@ -257,6 +257,39 @@ describe("createBrowserOAuthAuthorize", () => {
       }
     }
   })
+
+  it("skips browser auto-open when inputs request it", async () => {
+    const scheduleOAuthServerStop = vi.fn()
+    const persistOAuthTokens = vi.fn(async () => {})
+    const openAuthUrl = vi.fn()
+
+    const authorize = createBrowserOAuthAuthorize({
+      authMode: "native",
+      spoofMode: "native",
+      runInteractiveAuthMenu: vi.fn(async () => "exit" as const),
+      startOAuthServer: vi.fn(async () => ({ redirectUri: "http://localhost:1455/auth/callback" })),
+      waitForOAuthCallback: vi.fn(async () => ({
+        refresh_token: "rt_no_open",
+        access_token: "at_no_open",
+        expires_in: 1200
+      })),
+      scheduleOAuthServerStop,
+      persistOAuthTokens,
+      openAuthUrl,
+      shutdownGraceMs: 1_000,
+      shutdownErrorGraceMs: 5_000
+    })
+
+    const payload = await authorize({ autoOpen: "false" })
+    expect(payload.url).toContain("https://auth.openai.com/oauth/authorize")
+    await expect(payload.callback()).resolves.toMatchObject({
+      type: "success",
+      refresh: "rt_no_open",
+      access: "at_no_open"
+    })
+    expect(openAuthUrl).not.toHaveBeenCalled()
+    expect(persistOAuthTokens).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe("createHeadlessOAuthAuthorize", () => {

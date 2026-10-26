@@ -101,6 +101,11 @@ function toOAuthSuccess(tokens: TokenResponse): OAuthSuccess {
 
 export function createBrowserOAuthAuthorize(deps: BrowserAuthorizeDeps, mode: "login" | "manage" = "login") {
   return async (inputs?: Record<string, string>): Promise<OAuthAuthorizePayload> => {
+    // Hosts with their own URL presentation (opencode TUI) pass
+    // { autoOpen: "false" } so only one browser tab opens per attempt.
+    // A second tab with the same state replays the callback and lands on
+    // the "Invalid state" page. CLI hosts omit it and keep auto-open.
+    const autoOpen = inputs?.autoOpen !== "false"
     const hasInteractiveTerminal = process.stdin.isTTY && process.stdout.isTTY
     if (mode === "manage" && !hasInteractiveTerminal) {
       return {
@@ -113,7 +118,7 @@ export function createBrowserOAuthAuthorize(deps: BrowserAuthorizeDeps, mode: "l
     const shouldUseInteractiveMenu =
       hasInteractiveTerminal && (mode === "manage" || process.env.OPENCODE_NO_BROWSER !== "1")
 
-    const runSingleBrowserOAuthInline = async (): Promise<TokenResponse | null> => {
+    const runSingleBrowserOAuthInline = async (openUrlInBrowser: boolean): Promise<TokenResponse | null> => {
       let redirectUri: string
       try {
         ;({ redirectUri } = await deps.startOAuthServer())
@@ -131,7 +136,7 @@ export function createBrowserOAuthAuthorize(deps: BrowserAuthorizeDeps, mode: "l
         deps.spoofMode === "codex" ? "codex_cli_rs" : "opencode"
       )
       const callbackPromise = deps.waitForOAuthCallback(pkce, state, deps.authMode)
-      deps.openAuthUrl(authUrl)
+      if (openUrlInBrowser) deps.openAuthUrl(authUrl)
       const redactedAuthUrl = new URL(authUrl)
       if (redactedAuthUrl.searchParams.has("state")) {
         redactedAuthUrl.searchParams.set("state", "[redacted]")
@@ -181,7 +186,7 @@ export function createBrowserOAuthAuthorize(deps: BrowserAuthorizeDeps, mode: "l
           }
         }
 
-        const tokens = await runSingleBrowserOAuthInline()
+        const tokens = await runSingleBrowserOAuthInline(autoOpen)
         if (tokens) {
           lastAddedTokens = tokens
           continue
@@ -216,7 +221,7 @@ export function createBrowserOAuthAuthorize(deps: BrowserAuthorizeDeps, mode: "l
       deps.spoofMode === "codex" ? "codex_cli_rs" : "opencode"
     )
     const callbackPromise = deps.waitForOAuthCallback(pkce, state, deps.authMode)
-    deps.openAuthUrl(authUrl)
+    if (autoOpen) deps.openAuthUrl(authUrl)
     const displayUrl = redactOAuthDisplayUrl(authUrl)
 
     return {

@@ -288,7 +288,9 @@ export function createOAuthServerController<TPkce, TTokens>(
               sendHtml(200, input.buildOAuthErrorHtml(errorMsg))
               return
             }
-            const errorMsg = "Invalid state - potential CSRF attack"
+            const errorMsg = pendingOAuth
+              ? "Invalid state - potential CSRF attack. This looks like an older login tab: complete authorization in the newest tab only, or restart login."
+              : "Invalid state - potential CSRF attack. No login attempt is waiting for this callback: restart login and use the newest tab only."
             emitDebug("callback_error", { reason: errorMsg })
             sendHtml(400, input.buildOAuthErrorHtml(errorMsg))
             return

@@ -43,8 +43,11 @@ export function buildV2OAuthMethodRegistration(method, id) {
     // top-level authorize to the connectable implementations map, and the
     // list UI reads entry.methods. A nested authorize lists the method but
     // every connect fails with "OAuth method not found" (500).
-    authorize: async () => {
-      const flow = await method.authorize()
+    // The TUI presents url/instructions with its own open action, so ask
+    // the v1 flow not to auto-open: two tabs share one state and the
+    // second completion lands on the "Invalid state" page.
+    authorize: async (answer) => {
+      const flow = await method.authorize({ ...(answer ?? {}), autoOpen: "false" })
       return {
         url: flow.url,
         instructions: flow.instructions,

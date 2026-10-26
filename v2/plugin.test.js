@@ -82,6 +82,45 @@ test("v2 registration surfaces authorization failure through callback", async ()
   await assert.rejects(authorization.callback, /OpenAI authorization failed/)
 })
 
+test("v2 registration asks the v1 flow not to auto-open", async () => {
+  let seenInputs
+  const v1method = {
+    label: "ChatGPT Pro/Plus (browser)",
+    authorize: async (inputs) => {
+      seenInputs = inputs
+      return {
+        url: "https://auth.example/authorize",
+        instructions: "Complete authorization in your browser.",
+        method: "auto",
+        callback: async () => ({ type: "success", access: "a", refresh: "r", expires: 123 })
+      }
+    }
+  }
+  const authorization = await buildV2OAuthMethodRegistration(v1method, "codex-auth-0").authorize({})
+  assert.equal(seenInputs?.autoOpen, "false")
+  assert.equal(authorization.mode, "auto")
+  await authorization.callback.catch(() => {})
+})
+
+test("v2 registration forwards host answers to the v1 flow", async () => {
+  let seenInputs
+  const v1method = {
+    label: "ChatGPT Pro/Plus (browser)",
+    authorize: async (inputs) => {
+      seenInputs = inputs
+      return {
+        url: "https://auth.example/authorize",
+        instructions: "Complete authorization in your browser.",
+        method: "auto",
+        callback: async () => ({ type: "success", access: "a", refresh: "r", expires: 123 })
+      }
+    }
+  }
+  const authorization = await buildV2OAuthMethodRegistration(v1method, "codex-auth-0").authorize({ extra: "1" })
+  assert.deepEqual(seenInputs, { extra: "1", autoOpen: "false" })
+  await authorization.callback.catch(() => {})
+})
+
 test("v1 event forwarder translates session deletion cleanup", async () => {
   const received = []
   const forward = createV1EventForwarder({ event: async (input) => void received.push(input) })
