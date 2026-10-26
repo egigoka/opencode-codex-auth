@@ -274,7 +274,9 @@ function hideUltraVariantsInConfig(config: OpenCodeConfig): void {
   }
 }
 
-function hideUltraVariantsInProviderModels(providerModels: Record<string, Record<string, unknown>> | undefined | null): void {
+function hideUltraVariantsInProviderModels(
+  providerModels: Record<string, Record<string, unknown>> | undefined | null
+): void {
   if (!providerModels) return
   for (const model of Object.values(providerModels)) {
     if (!model.variants || typeof model.variants !== "object" || Array.isArray(model.variants)) continue
